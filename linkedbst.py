@@ -3,7 +3,10 @@ File: linkedbst.py
 Author: Ken Lambert
 """
 
+
 from math import log
+from random import shuffle
+from timeit import timeit
 from abstractcollection import AbstractCollection
 from bstnode import BSTNode
 from linkedstack import LinkedStack
@@ -328,6 +331,47 @@ class LinkedBST(AbstractCollection):
             else:
                 return prev_val
 
+
+    def read_words(self, path):
+        """
+        reads words from a file;
+        returns a list
+        """
+        total_ls = []
+        with open(path, 'r', encoding='utf-8') as file:
+            for line in file:
+                word = line.strip()
+                total_ls.append(word)
+        return total_ls
+
+    def choose_target_words(self, lst, num):
+        """
+        randomly defines num of
+        target words from the list
+        """
+        shuffle(lst)
+        target_words_ls = lst[:num]
+        return target_words_ls
+
+    def test_1(self, all_words:list, to_find:list):
+        """finds num of words in
+        the alphabetically sorted list"""
+        idxs = []
+        for word in to_find:
+            idx = all_words.index(word)
+            idxs.append(idx)
+        return idxs
+
+    def test_2_3_4(self, binary_tree, to_find:list):
+        """finds num of words in the
+        alphabetically sorted binary tree"""
+        results = []
+        for word in to_find:
+            result = binary_tree.find(word)
+            results.append(result)
+        return results
+
+
     def demo_bst(self, path):
         """
         Demonstration of efficiency binary search tree for the search tasks.
@@ -336,3 +380,43 @@ class LinkedBST(AbstractCollection):
         :return:
         :rtype:
         """
+        words_ls = self.read_words(path)
+        look_for = self.choose_target_words(words_ls, 10000)
+        # case 1: regular list search
+        time_1 = timeit('self.test_1(words_ls, look_for)',\
+            globals={'self':LinkedBST(), 'words_ls':words_ls, 'look_for':look_for}, number=1)
+        print()
+        print('test 1: regular list search')
+        print('time 1:', time_1)
+        print()
+
+        # case 2: binary tree from sorted list search
+        tree_1 = LinkedBST(words_ls)
+        time_2 = timeit('self.test_2_3_4(tree_1, look_for)',\
+            globals={'self':LinkedBST(), 'tree_1':tree_1, 'look_for':look_for}, number=1)
+        print('test 2: binary tree (from sorted list) search')
+        print('time 2:', time_2)
+        print()
+
+        # case 3: binary tree from unsorted list search
+        shuffle(words_ls)
+        tree_2 = LinkedBST(words_ls)
+        time_3 = timeit('self.test_2_3_4(tree_2, look_for)',\
+            globals={'self':LinkedBST(), 'tree_2':tree_2, 'look_for':look_for}, number=1)
+        print('test 3: binary tree (from unsorted list) search')
+        print('time 3:', time_3)
+        print()
+
+        # case 4: balanced binary tree search
+        tree_1.rebalance()
+        time_4 = timeit('self.test_2_3_4(tree_1, look_for)',\
+            globals={'self':LinkedBST(), 'tree_1':tree_1, 'look_for':look_for}, number=1)
+        print('test 4: balanced binary tree search')
+        print('time 4:', time_4)
+        print()
+
+
+
+
+test_tree = LinkedBST()
+test_tree.demo_bst('words.txt')
